@@ -53,6 +53,7 @@ static void *add_vals(void *args)
         *val = (*offset * N_LOOPS) + j;
         hashmap_put(map, val, val);
     }
+    free(args);
     return NULL;
 }
 
@@ -79,8 +80,11 @@ bool mt_add_vals(void)
 /* add a value over and over to test the del functionality */
 void *add_val(void *args)
 {
-    for (int j = 0; j < N_LOOPS; j++)
-        hashmap_put(map, &MAX_VAL_PLUS_ONE, &MAX_VAL_PLUS_ONE);
+    for (int j = 0; j < N_LOOPS; j++) {
+        int *val = malloc(sizeof(int));
+        *val = N_THREADS * N_LOOPS + 1;
+        hashmap_put(map, val, val);
+    }
     return NULL;
 }
 
@@ -149,6 +153,7 @@ bool test_add()
                    TOTAL);
         }
     }
+    hashmap_free(map);
 
     printf("Done. Loops=%d\n", loops);
     return true;
@@ -187,6 +192,8 @@ bool test_del()
             return false;
         }
     }
+    hashmap_free(map);
+
     printf("Done. Needed %u loops\n", loops);
     return true;
 }

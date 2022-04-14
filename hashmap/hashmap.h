@@ -55,4 +55,7 @@ bool hashmap_put(hashmap_t *map, const void *key, void *value);
  */
 bool hashmap_del(hashmap_t *map, const void *key);
 
+/* Free a hashmap and put all remaining node into free later list */
+void hashmap_free(hashmap_t *map);
+
 #endif

@@ -107,7 +107,7 @@ void free_later_stage(void)
     /* CAS-based lock in case multiple threads are calling this */
     acquire_lock(&lock);
 
-    if (!buffer_prev || buffer_prev->length == 0) {
+    if (buffer_prev) {
         release_lock(&lock);
         return;
     }
@@ -134,10 +134,16 @@ void free_later_run()
     /* At this point, all workers have processed one or more new flow since the
      * free_later buffer was filled. No threads are using the old, deleted data.
      */
-    for (list_node_t *n = buffer_prev->head; n; n = n->next) {
-        free_later_t *v = n->val;
-        v->free(v->var);
-        free(n);
+    for (list_node_t *n = buffer_prev->head, *prev = NULL; n;) {
+        prev = n;
+        n = n->next;
+
+        free_later_t *v = prev->val;
+
+        if (v->free)
+            v->free(v->var);
+        free(v);
+        free(prev);
     }
 
     free(buffer_prev);

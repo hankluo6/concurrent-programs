@@ -193,3 +193,15 @@ bool hashmap_del(hashmap_t *map, const void *key)
 
     return false;
 }
+
+void hashmap_free(hashmap_t *map)
+{
+    for (int bucket = 0; bucket < map->n_buckets; ++bucket) {
+        for (hashmap_kv_t *kv = map->buckets[bucket]; kv; kv = kv->next) {
+            map->destroy_node(map->opaque, kv);
+        }
+    }
+
+    free(map->buckets);
+    free(map);
+}
